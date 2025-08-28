@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react';
 import { auth } from '../../firebase.init';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -14,14 +14,16 @@ const SignUp = () => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
+        const name = e.target.name.value;
+        const photo = e.target.photo.value;
         const terms = e.target.terms.checked;
 
-        console.log(email, password, terms)
+        console.log(email, password, name, photo, terms)
         // reset error and status 
         setErrorMessage('');
         setSuccess(false);
         // console.log(typeof password);
-        if(!terms){
+        if (!terms) {
             setErrorMessage('Please accept our terms and conditions.');
             return;
         }
@@ -44,12 +46,25 @@ const SignUp = () => {
 
                 // Send Verification Email address 
                 sendEmailVerification(auth.currentUser)
-                .then(()=>{
-                    console.log('verification email sent');
-                })
-                .catch(error =>{
-                    console.log('Error', error);
-                })
+                    .then(() => {
+                        console.log('verification email sent');
+                    })
+                    .catch(error => {
+                        console.log('Error', error);
+                    })
+
+                // update profile name and photo url 
+                const profile = {
+                    displayName: name,
+                    photoURL: photo
+                }
+                updateProfile(auth.currentUser, profile)
+                    .then(() => {
+                        console.log('User profile Updated');
+                    })
+                    .catch(error => {
+                        console.log('User Profile Update error');
+                    })
             })
             .catch(error => {
                 console.log('Error', error.message);
@@ -64,6 +79,18 @@ const SignUp = () => {
         <div className="card bg-base-100 mx-auto w-full max-w-sm shrink-0 shadow-2xl">
             <h3 className="text-3xl font-bold ml-4">Sign Up now!</h3>
             <form onSubmit={handleSignUp} className="card-body">
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Name</span>
+                    </label>
+                    <input type="text" name='name' placeholder="name" className="input input-bordered" required />
+                </div>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Photo URL</span>
+                    </label>
+                    <input type="text" name='photo' placeholder="Photo URL" className="input input-bordered" required />
+                </div>
                 <div className="form-control">
                     <label className="label">
                         <span className="label-text">Email</span>
